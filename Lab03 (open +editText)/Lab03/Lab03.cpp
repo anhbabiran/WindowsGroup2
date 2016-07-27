@@ -1,4 +1,6 @@
-﻿// Lab03.cpp : Defines the entry point for the application.
+﻿//Nanaaaa Thiên chó điên
+
+// Lab03.cpp : Defines the entry point for the application.
 /*
 	Trong chương trình này, ta sẽ cố gắng lưu lại bản vẽ sau khi bản vẽ. 
 	Việc vẽ các đường thẳng tạm sẽ không được vẽ trực tiếp lên bản vẽ này.
