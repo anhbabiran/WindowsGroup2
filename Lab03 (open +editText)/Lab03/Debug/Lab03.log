@@ -1,4 +1,4 @@
-﻿Build started 27/07/2016 11:19:20 AM.
+﻿Build started 27/07/2016 9:49:24 PM.
      1>Project "C:\Users\Adminstator\Desktop\WindowsGroup2\Lab03 (open +editText)\Lab03\Lab03.vcxproj" on node 2 (build target(s)).
      1>InitializeBuildStatus:
          Creating "Debug\Lab03.unsuccessfulbuild" because "AlwaysCreate" was specified.
@@ -6,14 +6,14 @@
          All outputs are up-to-date.
          C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _WINDOWS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Yu"StdAfx.h" /Fp"Debug\Lab03.pch" /Fo"Debug\\" /Fd"Debug\vc100.pdb" /Gd /TP /analyze- /errorReport:prompt Lab03.cpp
          Lab03.cpp
-     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(401): warning C4066: characters beyond first in wide-character constant ignored
-     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(183): warning C4101: 'ps' : unreferenced local variable
-     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(182): warning C4101: 'wmId' : unreferenced local variable
-     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(379): warning C4101: 'szFile' : unreferenced local variable
-     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(538): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
-     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(557): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
-     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(577): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
-     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(593): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
+     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(411): warning C4066: characters beyond first in wide-character constant ignored
+     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(188): warning C4101: 'ps' : unreferenced local variable
+     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(187): warning C4101: 'wmId' : unreferenced local variable
+     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(389): warning C4101: 'szFile' : unreferenced local variable
+     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(563): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
+     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(582): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
+     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(602): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
+     1>c:\users\adminstator\desktop\windowsgroup2\lab03 (open +edittext)\lab03\lab03.cpp(618): warning C4805: '==' : unsafe mix of type 'BOOL' and type 'bool' in operation
        ResourceCompile:
          All outputs are up-to-date.
        ManifestResourceCompile:
@@ -36,4 +36,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:00.68
+Time Elapsed 00:00:00.63

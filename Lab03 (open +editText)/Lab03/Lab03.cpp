@@ -25,6 +25,8 @@ BOOL enTrainDessin;
 HBRUSH hbrBackground;
 //====================================na=====================
 TCHAR buff[1024];
+HFONT g_hfFont = NULL;
+COLORREF g_rgbText = RGB(0, 0, 0);
 //====================================a======================
 HBRUSH brChose = CreateHatchBrush(HS_BDIAGONAL,RGB(0, 0, 255));
 BOOL checkBrush = false;
@@ -69,6 +71,9 @@ VOID				DrawRound(HDC hdc);
 VOID CreateBMPFile(HWND hwnd, LPTSTR pszFile, PBITMAPINFO pbi,HBITMAP hBMP, HDC hDC);
 PBITMAPINFO CreateBitmapInfoStruct(HWND hwnd, HBITMAP hBmp);
 void errhandler(LPCTSTR, HWND);
+//----------------------Na-----------------------
+void DoSelectFont(HWND hwnd);
+//----------------------------------------------
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -219,6 +224,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		case WM_CREATE:
 		{
+			//Font
+			g_hfFont = (HFONT)GetStockObject(DEFAULT_GUI_FONT);
+			/////
+
 			p1.x = p1.y = 0;
 			p2 = p1;
 			mode = 100;
@@ -297,11 +306,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					mode = 8;
 					break;
 
+				/*
 				case ID_FILE_SAVE:
 					pbmi = CreateBitmapInfoStruct(hWnd, hBitmap);
 					CreateBMPFile(hWnd, _T("BITMAP.bmp"), pbmi, hBitmap, hdc);
 					draw = true;
 					break;
+				*/
 
 				case ID_FILE_EXIT:
 					if (draw)
@@ -316,7 +327,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						if (MessageBox(hWnd, _T("Do you want to save?"), _T("Confirm close"), MB_OKCANCEL | MB_ICONQUESTION) == 1)
 						{
 							pbmi = CreateBitmapInfoStruct(hWnd, hBitmap);
-							CreateBMPFile(hWnd, _T("BITMAP.bmp"), pbmi, hBitmap, hdc);
+							//CreateBMPFile(hWnd, _T("BITMAP.bmp"), pbmi, hBitmap, hdc);
 							DestroyWindow(hWnd);
 						}
 						else
@@ -366,7 +377,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						BitBlt(hdc, 0, 0, rect.right - rect.left, rect.bottom - rect.top, memDC, 0, 0, SRCCOPY);
 
 						DeleteObject(memDC);
-						//DeleteObject(hdc);
 						//MessageBox(NULL,ofn.lpstrFile,_T("Selected file"),MB_OK);
 					
 					}
@@ -387,7 +397,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					ofn.nMaxFile = sizeof(szFile)/ sizeof(*szFile);
 					ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
 					ofn.lpstrDefExt = (LPCWSTR)L"bmp";
-					if (GetSaveFileName(&ofn)==TRUE) 
+					if (GetSaveFileName(&ofn) == TRUE) 
 					{
 						PBITMAPINFO PBi = CreateBitmapInfoStruct(hWnd, hBitmap);
 						CreateBMPFile(hWnd, ofn.lpstrFile, PBi, hBitmap, hdc);
@@ -396,26 +406,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				break;
 
 //=========Na================================================
-				case ID_FORMAT_TEXT:
-				{
-					buff[0] = _T('/0');
-					DialogBox(hInst, MAKEINTRESOURCE(IDD_TEXT), hWnd, (DLGPROC) Text);
+					case ID_FORMAT_TEXT:
+					{
+						buff[0] = _T('/0');
+						//Gọi hàm text lưu biến chuỗi vào buff
+						DialogBox(hInst, MAKEINTRESOURCE(IDD_TEXT), hWnd, (DLGPROC) Text);
 
-					// Grab the window dimensions.
-					RECT bounds;
-					GetClientRect(hWnd, &bounds);
-					// Grab a DC to draw with.
-					HDC hdc = GetDC(hWnd);
-					DrawText(hdc, buff, -1, &bounds, DT_CENTER | DT_VCENTER);
+						// Grab the window dimensions.
+						RECT bounds;
+						GetClientRect(hWnd, &bounds);
+						// Grab a DC to draw with.
+						HDC hdc = GetDC(hWnd);
 
-					//Tiến hành cho vẽ lên bitmap
-					HDC memDC = CreateCompatibleDC(hdc);
-					SelectObject(memDC, hBitmap);
-					DrawText(memDC, buff, -1, &bounds, DT_CENTER | DT_VCENTER);
-					DeleteObject(memDC);
-					ReleaseDC(hWnd, hdc);
-				}
-				break;
+						//Chọn font
+						DoSelectFont(hWnd);  
+						//Dùng biến font tạm lưu giá trị ghfont(nếu k bị trả về mặc đinh)
+						HFONT tmpFont = (HFONT)SelectObject(hdc, g_hfFont);
+						InvalidateRect(hWnd, NULL, TRUE);   
+						UpdateWindow(hWnd);
+						//Hàm vẽ chữ			
+						DrawText(hdc, buff, -1, &bounds, DT_CENTER | DT_VCENTER);
+						SelectObject(hdc, tmpFont); 
+					 
+						//Tiến hành cho vẽ lên bitmap
+						HDC memDC = CreateCompatibleDC(hdc);
+
+						SelectObject(memDC, hBitmap);
+						BitBlt(hdc, 0, 0, 50, 50, memDC, 0, 0, SRCCOPY);
+
+						DrawText(memDC, buff, -1, &bounds, DT_CENTER | DT_VCENTER);
+						DeleteDC(memDC);
+						DeleteObject(memDC);
+					 
+						ReleaseDC(hWnd, hdc);
+					}
+					break;
 //=================================================== 
 				case ID_FORMAT_BRUSH:
 				{
@@ -1136,4 +1161,34 @@ INT_PTR CALLBACK Brush(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     }
     return (INT_PTR)FALSE;
+}
+
+void DoSelectFont(HWND hwnd)
+{
+	//HFONT g_hfFont = GetStockObject(DEFAULT_GUI_FONT);
+	
+    CHOOSEFONT cf = {sizeof(CHOOSEFONT)};
+    LOGFONT lf;
+
+    GetObject(g_hfFont, sizeof(LOGFONT), &lf);
+
+    cf.Flags = CF_EFFECTS | CF_INITTOLOGFONTSTRUCT | CF_SCREENFONTS;
+    cf.hwndOwner = hwnd;
+    cf.lpLogFont = &lf;
+    cf.rgbColors = g_rgbText;
+
+    if(ChooseFont(&cf))
+    {
+        HFONT hf = CreateFontIndirect(&lf);
+        if(hf)
+        {
+            g_hfFont = hf;
+        }
+        else
+        {
+            MessageBox(hwnd, _T("Font creation failed!"), _T("Error"), MB_OK | MB_ICONEXCLAMATION);
+        }
+		
+        g_rgbText = cf.rgbColors;
+    }
 }
