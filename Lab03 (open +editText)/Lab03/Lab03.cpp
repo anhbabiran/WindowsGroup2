@@ -25,7 +25,10 @@ BOOL enTrainDessin;
 HBRUSH hbrBackground;
 //====================================na=====================
 TCHAR buff[1024];
-//===========================================================
+//====================================a======================
+HBRUSH brChose = CreateHatchBrush(HS_BDIAGONAL,RGB(0, 0, 255));
+BOOL checkBrush = false;
+//============================================================
 
 int mode; //mode de dessin==> 0 pour ligne, 1 pour libre
 int size = 1;
@@ -41,7 +44,9 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 //================================================na===========
 INT_PTR CALLBACK	Text(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-//===========================================================
+//=======================================a====================
+INT_PTR CALLBACK Brush(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+//=============================================================================
 
 VOID				BackgroudColorDialog(HWND);
 
@@ -351,17 +356,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					if (GetOpenFileName(&ofn)==TRUE) 
 					{
 						///////////////Thiênnnn
-						HBITMAP hBMP = (HBITMAP)LoadImage( NULL, ofn.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+						hBitmap = (HBITMAP)LoadImage( NULL, ofn.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 						HDC memDC = CreateCompatibleDC(hdc);
 
 						// Select the new bitmap
-						SelectObject(memDC, hBMP);
+						SelectObject(memDC, hBitmap);
 						RECT rect;
 						GetClientRect(hWnd, &rect);
 						BitBlt(hdc, 0, 0, rect.right - rect.left, rect.bottom - rect.top, memDC, 0, 0, SRCCOPY);
 
+						DeleteObject(memDC);
+						//DeleteObject(hdc);
 						//MessageBox(NULL,ofn.lpstrFile,_T("Selected file"),MB_OK);
 					
+					}
+				}
+				break;
+
+				case ID_SYSTEMDIALOG_SAVEFILEDIALOG:
+				{
+					OPENFILENAME ofn;
+					TCHAR szFile[260];
+					ZeroMemory(&ofn, sizeof(ofn));
+					char szFileName[sizeof(szFile)/ sizeof(*szFile)];
+					ZeroMemory(szFileName, sizeof(szFile)/ sizeof(*szFile));
+					ofn.lStructSize = sizeof(ofn);
+					ofn.hwndOwner = NULL;
+					ofn.lpstrFilter = _T("JPG Files(*.jpg)\0 * .jpg\0Bmp Files(*.bmp)\0 * .bmp\0Text Files(*.txt)\0 * .txt\0All Files(*.*)\0 * .*\0");
+					ofn.lpstrFile = (LPWSTR)szFileName;
+					ofn.nMaxFile = sizeof(szFile)/ sizeof(*szFile);
+					ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+					ofn.lpstrDefExt = (LPCWSTR)L"bmp";
+					if (GetSaveFileName(&ofn)==TRUE) 
+					{
+						PBITMAPINFO PBi = CreateBitmapInfoStruct(hWnd, hBitmap);
+						CreateBMPFile(hWnd, ofn.lpstrFile, PBi, hBitmap, hdc);
 					}
 				}
 				break;
@@ -387,7 +416,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					ReleaseDC(hWnd, hdc);
 				}
 				break;
-//===================================================
+//=================================================== 
+				case ID_FORMAT_BRUSH:
+				{
+					DialogBox(hInst, MAKEINTRESOURCE(IDD_Brush), hWnd, (DLGPROC) Brush);
+				}
+				break;
+//========================================================
 				default:
 					return DefWindowProc(hWnd, message, wParam, lParam);
             
@@ -498,6 +533,13 @@ VOID DrawRectangle(HDC hdc)
 	{
 		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
 		SelectObject(hdc, hPen);
+		
+		// Thêm biến điều kiện lấy brush
+		if (checkBrush == true)
+			SelectObject(hdc, brChose);
+		/////////////////
+		// Or dùng SelectObject(hdc, GetStockObject(DC_BRUSH))
+		/////
 
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		Rectangle(hdc, p1.x, p1.y, p2.x, p2.y);
@@ -510,6 +552,10 @@ VOID DrawSquare(HDC hdc)
 	{
 		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
 		SelectObject(hdc, hPen);
+
+		// Thêm biến điều kiện lấy brush
+		if (checkBrush == true)
+			SelectObject(hdc, brChose);
 
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		int k = p2.x - p1.x;
@@ -527,6 +573,10 @@ VOID DrawEllipse(HDC hdc)
 		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
 		SelectObject(hdc, hPen);
 
+		// Thêm biến điều kiện lấy brush
+		if (checkBrush == true)
+			SelectObject(hdc, brChose);
+
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		Ellipse(hdc, p1.x, p1.y, p2.x, p2.y);
 	}
@@ -538,6 +588,10 @@ VOID DrawRound(HDC hdc)
 	{
 		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
 		SelectObject(hdc, hPen);
+
+		// Thêm biến điều kiện lấy brush
+		if (checkBrush == true)
+			SelectObject(hdc, brChose);
 
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		int k = p2.x - p1.x;
@@ -1041,4 +1095,45 @@ VOID BackgroudColorDialog(HWND hWnd)
 		hbrBackground = CreateSolidBrush(cc.rgbResult);
 		InvalidateRect(hWnd, NULL, true);
 	}
+}
+
+//==================================================
+INT_PTR CALLBACK Brush(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        return (INT_PTR)TRUE;
+
+    case WM_COMMAND:
+        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+        {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+		else if (LOWORD(wParam) == IDC_BUTTON1)
+		{
+			checkBrush = true;
+			brChose = CreateHatchBrush(HS_BDIAGONAL,RGB(0, 0, 255));
+			EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BUTTON2)
+		{
+			checkBrush = true;
+			brChose = CreateHatchBrush(HS_CROSS,RGB(0, 0, 255));
+			EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BUTTON3)
+		{
+			checkBrush = true;
+			brChose = CreateHatchBrush(HS_VERTICAL,RGB(0, 0, 255));
+			EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+		}
+        break;
+    }
+    return (INT_PTR)FALSE;
 }
