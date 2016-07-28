@@ -15,7 +15,7 @@
 #define ID_TIMER1	123123
 
 //-------------na----------
-const int NUMBUTTONS = 11;							// current instance
+const int NUMBUTTONS = 14;							// current instance
 //-------------------------------
 
 // Global Variables:
@@ -172,7 +172,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	InitCtrlEx.dwICC  = ICC_BAR_CLASSES;
 	InitCommonControlsEx(&InitCtrlEx);
 
-	TBBUTTON tbrButtons[11];
+	TBBUTTON tbrButtons[14];
 	tbrButtons[0].iBitmap = 0;
 	tbrButtons[0].idCommand = ID_LINE_FREESTYTE;
 	tbrButtons[0].fsState = TBSTATE_ENABLED;
@@ -189,7 +189,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	tbrButtons[1].iString = 0;
 
 	tbrButtons[2].iBitmap = 1;
-	tbrButtons[2].idCommand = ID_SHAPE_RECTANGLE;
+	tbrButtons[2].idCommand = ID_FORMAT_TEXT;
 	tbrButtons[2].fsState = TBSTATE_ENABLED;
 	tbrButtons[2].fsStyle = TBSTYLE_SEP;
 	tbrButtons[2].dwData = 0L;
@@ -228,33 +228,51 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	tbrButtons[7].fsState = TBSTATE_ENABLED;
 	tbrButtons[7].fsStyle = TBSTYLE_BUTTON;
 	tbrButtons[7].dwData = 0L;
-	tbrButtons[7].iBitmap = 0;
 	tbrButtons[7].iString = 0;
-
+	
 	tbrButtons[8].iBitmap = 7;
 	tbrButtons[8].idCommand = ID_SHAPE_ROUND;
 	tbrButtons[8].fsState = TBSTATE_ENABLED;
 	tbrButtons[8].fsStyle = TBSTYLE_BUTTON;
 	tbrButtons[8].dwData = 0L;
-	tbrButtons[8].iBitmap = 0;
 	tbrButtons[8].iString = 0;
-
+	
 	tbrButtons[9].iBitmap = 8;
-	tbrButtons[9].idCommand = ID_SHAPE_ELLIPSE;
+	tbrButtons[9].idCommand = ID_SYSTEMDIALOG_OPENFILEDIALOG;
 	tbrButtons[9].fsState = TBSTATE_ENABLED;
 	tbrButtons[9].fsStyle = TBSTYLE_BUTTON;
 	tbrButtons[9].dwData = 0L;
-	tbrButtons[9].iBitmap = 0;
 	tbrButtons[9].iString = 0;
-
+	
 	tbrButtons[10].iBitmap = 9;
-	tbrButtons[10].idCommand = ID_HELP_ABOUT;
+	tbrButtons[10].idCommand = ID_COLOR_GREEN;
 	tbrButtons[10].fsState = TBSTATE_ENABLED;
 	tbrButtons[10].fsStyle = TBSTYLE_BUTTON;
 	tbrButtons[10].dwData = 0L;
-	tbrButtons[10].iBitmap = 0;
 	tbrButtons[10].iString = 0;
 
+	
+	tbrButtons[11].iBitmap = 10;
+	tbrButtons[11].idCommand = ID_HELP_ABOUT;
+	tbrButtons[11].fsState = TBSTATE_ENABLED;
+	tbrButtons[11].fsStyle = TBSTYLE_BUTTON;
+	tbrButtons[11].dwData = 0L;
+	tbrButtons[11].iString = 0;
+	
+	tbrButtons[12].iBitmap = 11;
+	tbrButtons[12].idCommand = ID_COLOR_RED;
+	tbrButtons[12].fsState = TBSTATE_ENABLED;
+	tbrButtons[12].fsStyle = TBSTYLE_BUTTON;
+	tbrButtons[12].dwData = 0L;
+	tbrButtons[12].iString = 0;
+	
+	tbrButtons[13].iBitmap = 12;
+	tbrButtons[13].idCommand = ID_COLOR_BLUE;
+	tbrButtons[13].fsState = TBSTATE_ENABLED;
+	tbrButtons[13].fsStyle = TBSTYLE_BUTTON;
+	tbrButtons[13].dwData = 0L;
+	tbrButtons[13].iString = 0;
+	
 	HWND hWndToolbar;
 	hWndToolbar = CreateToolbarEx(hWnd,
 								  WS_VISIBLE | WS_CHILD | WS_BORDER,
