@@ -32,13 +32,11 @@ COLORREF colorCurrent = RGB(0, 0, 0);
 //====================================a======================
 HBRUSH brChose = CreateHatchBrush(HS_BDIAGONAL,RGB(0, 0, 255));
 int checkBrush = 0;
+int checkPen = 0;
 //============================================================
 
 int mode; //mode de dessin==> 0 pour ligne, 1 pour libre
 int size = 1;
-int color1 = 0;
-int color2 = 0;
-int color3 = 0;
 bool draw;
 
 // Forward declarations of functions included in this code module:
@@ -50,6 +48,7 @@ INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK	Text(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 //=======================================a====================
 INT_PTR CALLBACK Brush(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+INT_PTR CALLBACK Pen(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
 //=============================================================================
 
 VOID				BackgroudColorDialog(HWND);
@@ -73,9 +72,9 @@ VOID				DrawRound(HDC hdc);
 VOID CreateBMPFile(HWND hwnd, LPTSTR pszFile, PBITMAPINFO pbi,HBITMAP hBMP, HDC hDC);
 PBITMAPINFO CreateBitmapInfoStruct(HWND hwnd, HBITMAP hBmp);
 void errhandler(LPCTSTR, HWND);
-//----------------------Na-----------------------
+
 void DoSelectFont(HWND hwnd);
-//----------------------------------------------
+
 VOID DoSelectColor(HWND hWnd);
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
@@ -281,30 +280,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				case ID_SHAPE_ROUND:
 					mode = 7;
 					break;
-				case ID_COLOR_RED:
-					color1 = 255;
-					color2 = 0;
-					color3 = 0;
-					break;
-				case ID_COLOR_BLUE:
-					color1 = 0;
-					color2 = 0;
-					color3 = 255;
-					break;
-				case ID_COLOR_GREEN:
-					color1 = 0;
-					color2 = 255;
-					color3 = 0;
-					break;
-				case ID_WIDTH_5:
-					size = 5;
-					break;
-				case ID_WIDTH_10:
-					size = 10;
-					break;
-				case ID_WIDTH_15:
-					size = 15;
-					break;
 				case ID_LINE_CURVE:
 					mode = 8;
 					break;
@@ -414,50 +389,52 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					}
 				}
 				break;
+				case ID_FORMAT_TEXT:
+				{
+					buff[0] = _T('/0');
+					//Gọi hàm text lưu biến chuỗi vào buff
+					DialogBox(hInst, MAKEINTRESOURCE(IDD_TEXT), hWnd, (DLGPROC) Text);
 
-//=========Na================================================
-					case ID_FORMAT_TEXT:
-					{
-						buff[0] = _T('/0');
-						//Gọi hàm text lưu biến chuỗi vào buff
-						DialogBox(hInst, MAKEINTRESOURCE(IDD_TEXT), hWnd, (DLGPROC) Text);
+					// Grab the window dimensions.
+					RECT bounds;
+					GetClientRect(hWnd, &bounds);
+					// Grab a DC to draw with.
+					HDC hdc = GetDC(hWnd);
 
-						// Grab the window dimensions.
-						RECT bounds;
-						GetClientRect(hWnd, &bounds);
-						// Grab a DC to draw with.
-						HDC hdc = GetDC(hWnd);
-
-						//Chọn font
-						DoSelectFont(hWnd);  
-						//Dùng biến font tạm lưu giá trị ghfont(nếu k bị trả về mặc đinh)
-						HFONT tmpFont = (HFONT)SelectObject(hdc, g_hfFont);
-						InvalidateRect(hWnd, NULL, TRUE);   
-						UpdateWindow(hWnd);
-						//Hàm vẽ chữ			
-						DrawText(hdc, buff, -1, &bounds, DT_CENTER | DT_VCENTER);
-						SelectObject(hdc, tmpFont); 
+					//Chọn font
+					DoSelectFont(hWnd);  
+					//Dùng biến font tạm lưu giá trị ghfont(nếu k bị trả về mặc đinh)
+					HFONT tmpFont = (HFONT)SelectObject(hdc, g_hfFont);
+					InvalidateRect(hWnd, NULL, TRUE);   
+					UpdateWindow(hWnd);
+					//Hàm vẽ chữ			
+					DrawText(hdc, buff, -1, &bounds, DT_CENTER | DT_VCENTER);
+					SelectObject(hdc, tmpFont); 
 					 
-						//Tiến hành cho vẽ lên bitmap
-						HDC memDC = CreateCompatibleDC(hdc);
+					//Tiến hành cho vẽ lên bitmap
+					HDC memDC = CreateCompatibleDC(hdc);
 
-						SelectObject(memDC, hBitmap);
-						BitBlt(hdc, 0, 0, 50, 50, memDC, 0, 0, SRCCOPY);
+					SelectObject(memDC, hBitmap);
+					BitBlt(hdc, 0, 0, 50, 50, memDC, 0, 0, SRCCOPY);
 
-						DrawText(memDC, buff, -1, &bounds, DT_CENTER | DT_VCENTER);
-						DeleteDC(memDC);
-						DeleteObject(memDC);
+					DrawText(memDC, buff, -1, &bounds, DT_CENTER | DT_VCENTER);
+					DeleteDC(memDC);
+					DeleteObject(memDC);
 					 
-						ReleaseDC(hWnd, hdc);
-					}
-					break;
-//=================================================== 
+					ReleaseDC(hWnd, hdc);
+				}
+				break;
 				case ID_FORMAT_BRUSH:
 				{
 					DialogBox(hInst, MAKEINTRESOURCE(IDD_Brush), hWnd, (DLGPROC) Brush);
 				}
 				break;
-//========================================================
+
+				case ID_FORMAT_PEN:
+				{
+					DialogBox(hInst, MAKEINTRESOURCE(IDD_Pen), hWnd, (DLGPROC) Pen);
+				}
+				break;
 				default:
 					return DefWindowProc(hWnd, message, wParam, lParam);
             
@@ -534,6 +511,13 @@ VOID DrawLine(HDC hdc)
 	if (enTrainDessin == TRUE)
 	{
 		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		if (checkPen == 1)
+			hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		else if (checkPen == 2)
+			hPen = CreatePen(PS_DASH, size, colorCurrent);
+		else if (checkPen == 3)
+			hPen = CreatePen(PS_DOT, size, colorCurrent);
+
 		SelectObject(hdc, hPen);
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		LineTo(hdc, p2.x, p2.y);
@@ -545,6 +529,12 @@ VOID FreeDraw(HDC hdc)
 	if (enTrainDessin == TRUE)
 	{
 		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		if (checkPen == 1)
+			hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		else if (checkPen == 2)
+			hPen = CreatePen(PS_DASH, size, colorCurrent);
+		else if (checkPen == 3)
+			hPen = CreatePen(PS_DOT, size, colorCurrent);
 		SelectObject(hdc, hPen);
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		LineTo(hdc, p2.x, p2.y);
@@ -567,6 +557,12 @@ VOID DrawRectangle(HDC hdc)
 	if (enTrainDessin == TRUE)
 	{
 		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		if (checkPen == 1)
+			hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		else if (checkPen == 2)
+			hPen = CreatePen(PS_DASH, size, colorCurrent);
+		else if (checkPen == 3)
+			hPen = CreatePen(PS_DOT, size, colorCurrent);
 		SelectObject(hdc, hPen);
 		
 		// Thêm biến điều kiện lấy brush
@@ -599,6 +595,12 @@ VOID DrawSquare(HDC hdc)
 	if (enTrainDessin == TRUE)
 	{
 		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		if (checkPen == 1)
+			hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		else if (checkPen == 2)
+			hPen = CreatePen(PS_DASH, size, colorCurrent);
+		else if (checkPen == 3)
+			hPen = CreatePen(PS_DOT, size, colorCurrent);
 		SelectObject(hdc, hPen);
 
 		// Thêm biến điều kiện lấy brush
@@ -632,6 +634,12 @@ VOID DrawEllipse(HDC hdc)
 	if (enTrainDessin == TRUE)
 	{
 		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		if (checkPen == 1)
+			hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		else if (checkPen == 2)
+			hPen = CreatePen(PS_DASH, size, colorCurrent);
+		else if (checkPen == 3)
+			hPen = CreatePen(PS_DOT, size, colorCurrent);
 		SelectObject(hdc, hPen);
 
 		// Thêm biến điều kiện lấy brush
@@ -661,6 +669,12 @@ VOID DrawRound(HDC hdc)
 	if (enTrainDessin == TRUE)
 	{
 		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		if (checkPen == 1)
+			hPen = CreatePen(PS_SOLID, size, colorCurrent);
+		else if (checkPen == 2)
+			hPen = CreatePen(PS_DASH, size, colorCurrent);
+		else if (checkPen == 3)
+			hPen = CreatePen(PS_DOT, size, colorCurrent);
 		SelectObject(hdc, hPen);
 
 		// Thêm biến điều kiện lấy brush
@@ -1132,7 +1146,6 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
     return (INT_PTR)FALSE;
 }
 
-//======================================================na=====
 INT_PTR CALLBACK Text(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	HWND hwndCombo; 
@@ -1160,7 +1173,6 @@ INT_PTR CALLBACK Text(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 
     return (INT_PTR)FALSE;
 }
-//===========================================================
 
 VOID BackgroudColorDialog(HWND hWnd)
 {
@@ -1184,7 +1196,6 @@ VOID BackgroudColorDialog(HWND hWnd)
 	}
 }
 
-//==================================================
 INT_PTR CALLBACK Brush(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
     UNREFERENCED_PARAMETER(lParam);
@@ -1214,6 +1225,61 @@ INT_PTR CALLBACK Brush(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 		else if (LOWORD(wParam) == IDC_BUTTON3)
 		{
 			checkBrush = 3;
+			EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+		}
+        break;
+    }
+    return (INT_PTR)FALSE;
+}
+
+INT_PTR CALLBACK Pen(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    UNREFERENCED_PARAMETER(lParam);
+    switch (message)
+    {
+    case WM_INITDIALOG:
+        return (INT_PTR)TRUE;
+
+    case WM_COMMAND:
+        if (LOWORD(wParam) == IDOK || LOWORD(wParam) == IDCANCEL)
+        {
+            EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+        }
+		else if (LOWORD(wParam) == IDC_BUTTON1)
+		{
+			checkPen = 1;
+			EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BUTTON2)
+		{
+			checkPen = 2;
+			EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BUTTON5)
+		{
+			checkPen = 3;
+			EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BUTTON4)
+		{
+			size = 1;
+			EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BUTTON6)
+		{
+			size = 2;
+			EndDialog(hDlg, LOWORD(wParam));
+            return (INT_PTR)TRUE;
+		}
+		else if (LOWORD(wParam) == IDC_BUTTON3)
+		{
+			size = 3;
 			EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
 		}
