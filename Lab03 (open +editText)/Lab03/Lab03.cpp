@@ -1,6 +1,4 @@
-﻿//Nanaaaa Thiên chó điên
-
-// Lab03.cpp : Defines the entry point for the application.
+﻿// Lab03.cpp : Defines the entry point for the application.
 /*
 	Trong chương trình này, ta sẽ cố gắng lưu lại bản vẽ sau khi bản vẽ. 
 	Việc vẽ các đường thẳng tạm sẽ không được vẽ trực tiếp lên bản vẽ này.
@@ -29,9 +27,11 @@ HBRUSH hbrBackground;
 TCHAR buff[1024];
 HFONT g_hfFont = NULL;
 COLORREF g_rgbText = RGB(0, 0, 0);
+
+COLORREF colorCurrent = RGB(0, 0, 0);
 //====================================a======================
 HBRUSH brChose = CreateHatchBrush(HS_BDIAGONAL,RGB(0, 0, 255));
-BOOL checkBrush = false;
+int checkBrush = 0;
 //============================================================
 
 int mode; //mode de dessin==> 0 pour ligne, 1 pour libre
@@ -76,6 +76,7 @@ void errhandler(LPCTSTR, HWND);
 //----------------------Na-----------------------
 void DoSelectFont(HWND hwnd);
 //----------------------------------------------
+VOID DoSelectColor(HWND hWnd);
 
 int APIENTRY _tWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -237,7 +238,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			enTrainDessin = FALSE;
 
 			//Tạo bitmap
-			HDC hdc = GetDC(hWnd);
+			hdc = GetDC(hWnd);
 			RECT rect;
 			GetClientRect(hWnd, &rect);
 			//Tạo ra một bitmap tương thích với DC màn hình
@@ -308,13 +309,28 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					mode = 8;
 					break;
 
-				/*
 				case ID_FILE_SAVE:
-					pbmi = CreateBitmapInfoStruct(hWnd, hBitmap);
-					CreateBMPFile(hWnd, _T("BITMAP.bmp"), pbmi, hBitmap, hdc);
-					draw = true;
-					break;
-				*/
+				{
+					OPENFILENAME ofn;
+					TCHAR szFile[260];
+					ZeroMemory(&ofn, sizeof(ofn));
+					char szFileName[sizeof(szFile)/ sizeof(*szFile)];
+					ZeroMemory(szFileName, sizeof(szFile)/ sizeof(*szFile));
+					ofn.lStructSize = sizeof(ofn);
+					ofn.hwndOwner = NULL;
+					ofn.lpstrFilter = _T("JPG Files(*.jpg)\0 * .jpg\0Bmp Files(*.bmp)\0 * .bmp\0Text Files(*.txt)\0 * .txt\0All Files(*.*)\0 * .*\0");
+					ofn.lpstrFile = (LPWSTR)szFileName;
+					ofn.nMaxFile = sizeof(szFile)/ sizeof(*szFile);
+					ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+					ofn.lpstrDefExt = (LPCWSTR)L"bmp";
+					if (GetSaveFileName(&ofn) == TRUE) 
+					{
+						PBITMAPINFO PBi = CreateBitmapInfoStruct(hWnd, hBitmap);
+						CreateBMPFile(hWnd, ofn.lpstrFile, PBi, hBitmap, hdc);
+					}
+				}
+				break;
+				
 
 				case ID_FILE_EXIT:
 					if (draw)
@@ -329,7 +345,23 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						if (MessageBox(hWnd, _T("Do you want to save?"), _T("Confirm close"), MB_OKCANCEL | MB_ICONQUESTION) == 1)
 						{
 							pbmi = CreateBitmapInfoStruct(hWnd, hBitmap);
-							//CreateBMPFile(hWnd, _T("BITMAP.bmp"), pbmi, hBitmap, hdc);
+							OPENFILENAME ofn;
+							TCHAR szFile[260];
+							ZeroMemory(&ofn, sizeof(ofn));
+							char szFileName[sizeof(szFile)/ sizeof(*szFile)];
+							ZeroMemory(szFileName, sizeof(szFile)/ sizeof(*szFile));
+							ofn.lStructSize = sizeof(ofn);
+							ofn.hwndOwner = NULL;
+							ofn.lpstrFilter = _T("JPG Files(*.jpg)\0 * .jpg\0Bmp Files(*.bmp)\0 * .bmp\0Text Files(*.txt)\0 * .txt\0All Files(*.*)\0 * .*\0");
+							ofn.lpstrFile = (LPWSTR)szFileName;
+							ofn.nMaxFile = sizeof(szFile)/ sizeof(*szFile);
+							ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+							ofn.lpstrDefExt = (LPCWSTR)L"bmp";
+							if (GetSaveFileName(&ofn) == TRUE) 
+							{
+								PBITMAPINFO PBi = CreateBitmapInfoStruct(hWnd, hBitmap);
+								CreateBMPFile(hWnd, ofn.lpstrFile, PBi, hBitmap, hdc);
+							}
 							DestroyWindow(hWnd);
 						}
 						else
@@ -341,11 +373,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, (DLGPROC) About);
 					break;
 
-				case ID_COLORSELECTDIALOG_CHANGEBACKGROUNDCOLOR:
-					BackgroudColorDialog(hWnd);
+				case ID_FORMAT_COLOR:
+					DoSelectColor(hWnd);
 					break;
 
-				case ID_SYSTEMDIALOG_OPENFILEDIALOG:
+				case ID_FILE_OPEN:
 				{
 					OPENFILENAME ofn; 
 					TCHAR szFile[260];
@@ -379,30 +411,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 						BitBlt(hdc, 0, 0, rect.right - rect.left, rect.bottom - rect.top, memDC, 0, 0, SRCCOPY);
 
 						DeleteObject(memDC);
-						//MessageBox(NULL,ofn.lpstrFile,_T("Selected file"),MB_OK);
-					
-					}
-				}
-				break;
-
-				case ID_SYSTEMDIALOG_SAVEFILEDIALOG:
-				{
-					OPENFILENAME ofn;
-					TCHAR szFile[260];
-					ZeroMemory(&ofn, sizeof(ofn));
-					char szFileName[sizeof(szFile)/ sizeof(*szFile)];
-					ZeroMemory(szFileName, sizeof(szFile)/ sizeof(*szFile));
-					ofn.lStructSize = sizeof(ofn);
-					ofn.hwndOwner = NULL;
-					ofn.lpstrFilter = _T("JPG Files(*.jpg)\0 * .jpg\0Bmp Files(*.bmp)\0 * .bmp\0Text Files(*.txt)\0 * .txt\0All Files(*.*)\0 * .*\0");
-					ofn.lpstrFile = (LPWSTR)szFileName;
-					ofn.nMaxFile = sizeof(szFile)/ sizeof(*szFile);
-					ofn.Flags = OFN_EXPLORER | OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
-					ofn.lpstrDefExt = (LPCWSTR)L"bmp";
-					if (GetSaveFileName(&ofn) == TRUE) 
-					{
-						PBITMAPINFO PBi = CreateBitmapInfoStruct(hWnd, hBitmap);
-						CreateBMPFile(hWnd, ofn.lpstrFile, PBi, hBitmap, hdc);
 					}
 				}
 				break;
@@ -525,7 +533,7 @@ VOID DrawLine(HDC hdc)
 {
 	if (enTrainDessin == TRUE)
 	{
-		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
+		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
 		SelectObject(hdc, hPen);
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		LineTo(hdc, p2.x, p2.y);
@@ -536,7 +544,7 @@ VOID FreeDraw(HDC hdc)
 {
 	if (enTrainDessin == TRUE)
 	{
-		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
+		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
 		SelectObject(hdc, hPen);
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		LineTo(hdc, p2.x, p2.y);
@@ -558,12 +566,25 @@ VOID DrawRectangle(HDC hdc)
 {
 	if (enTrainDessin == TRUE)
 	{
-		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
+		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
 		SelectObject(hdc, hPen);
 		
 		// Thêm biến điều kiện lấy brush
-		if (checkBrush == true)
+		if (checkBrush == 1)
+		{
+			brChose = CreateHatchBrush(HS_BDIAGONAL,colorCurrent);
 			SelectObject(hdc, brChose);
+		}
+		else if (checkBrush == 2)
+		{
+			brChose = CreateHatchBrush(HS_CROSS,colorCurrent);
+			SelectObject(hdc, brChose);
+		}
+		else if (checkBrush == 3)
+		{
+			brChose = CreateHatchBrush(HS_VERTICAL,colorCurrent);
+			SelectObject(hdc, brChose);
+		}
 		/////////////////
 		// Or dùng SelectObject(hdc, GetStockObject(DC_BRUSH))
 		/////
@@ -577,12 +598,25 @@ VOID DrawSquare(HDC hdc)
 {
 	if (enTrainDessin == TRUE)
 	{
-		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
+		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
 		SelectObject(hdc, hPen);
 
 		// Thêm biến điều kiện lấy brush
-		if (checkBrush == true)
+		if (checkBrush == 1)
+		{
+			brChose = CreateHatchBrush(HS_BDIAGONAL,colorCurrent);
 			SelectObject(hdc, brChose);
+		}
+		else if (checkBrush == 2)
+		{
+			brChose = CreateHatchBrush(HS_CROSS,colorCurrent);
+			SelectObject(hdc, brChose);
+		}
+		else if (checkBrush == 3)
+		{
+			brChose = CreateHatchBrush(HS_VERTICAL,colorCurrent);
+			SelectObject(hdc, brChose);
+		}
 
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		int k = p2.x - p1.x;
@@ -597,12 +631,25 @@ VOID DrawEllipse(HDC hdc)
 {
 	if (enTrainDessin == TRUE)
 	{
-		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
+		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
 		SelectObject(hdc, hPen);
 
 		// Thêm biến điều kiện lấy brush
-		if (checkBrush == true)
+		if (checkBrush == 1)
+		{
+			brChose = CreateHatchBrush(HS_BDIAGONAL,colorCurrent);
 			SelectObject(hdc, brChose);
+		}
+		else if (checkBrush == 2)
+		{
+			brChose = CreateHatchBrush(HS_CROSS,colorCurrent);
+			SelectObject(hdc, brChose);
+		}
+		else if (checkBrush == 3)
+		{
+			brChose = CreateHatchBrush(HS_VERTICAL,colorCurrent);
+			SelectObject(hdc, brChose);
+		}
 
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		Ellipse(hdc, p1.x, p1.y, p2.x, p2.y);
@@ -613,12 +660,25 @@ VOID DrawRound(HDC hdc)
 {
 	if (enTrainDessin == TRUE)
 	{
-		HPEN hPen = CreatePen(PS_SOLID, size, RGB(color1, color2, color3));
+		HPEN hPen = CreatePen(PS_SOLID, size, colorCurrent);
 		SelectObject(hdc, hPen);
 
 		// Thêm biến điều kiện lấy brush
-		if (checkBrush == true)
+		if (checkBrush == 1)
+		{
+			brChose = CreateHatchBrush(HS_BDIAGONAL,colorCurrent);
 			SelectObject(hdc, brChose);
+		}
+		else if (checkBrush == 2)
+		{
+			brChose = CreateHatchBrush(HS_CROSS,colorCurrent);
+			SelectObject(hdc, brChose);
+		}
+		else if (checkBrush == 3)
+		{
+			brChose = CreateHatchBrush(HS_VERTICAL,colorCurrent);
+			SelectObject(hdc, brChose);
+		}
 
 		MoveToEx(hdc, p1.x, p1.y, NULL);
 		int k = p2.x - p1.x;
@@ -1141,22 +1201,19 @@ INT_PTR CALLBACK Brush(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
         }
 		else if (LOWORD(wParam) == IDC_BUTTON1)
 		{
-			checkBrush = true;
-			brChose = CreateHatchBrush(HS_BDIAGONAL,RGB(0, 0, 255));
+			checkBrush = 1;
 			EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
 		}
 		else if (LOWORD(wParam) == IDC_BUTTON2)
 		{
-			checkBrush = true;
-			brChose = CreateHatchBrush(HS_CROSS,RGB(0, 0, 255));
+			checkBrush = 2;
 			EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
 		}
 		else if (LOWORD(wParam) == IDC_BUTTON3)
 		{
-			checkBrush = true;
-			brChose = CreateHatchBrush(HS_VERTICAL,RGB(0, 0, 255));
+			checkBrush = 3;
 			EndDialog(hDlg, LOWORD(wParam));
             return (INT_PTR)TRUE;
 		}
@@ -1193,4 +1250,25 @@ void DoSelectFont(HWND hwnd)
 		
         g_rgbText = cf.rgbColors;
     }
+}
+
+VOID DoSelectColor(HWND hWnd)
+{
+	//MSDN example
+	CHOOSECOLOR cc;                 // common dialog box structure 
+	static COLORREF acrCustClr[16]; // array of custom colors
+	static DWORD rgbCurrent;        // initial color selection
+									// Initialize CHOOSECOLOR 
+	ZeroMemory(&cc, sizeof(cc));
+	cc.lStructSize = sizeof(cc);
+	cc.hwndOwner = hWnd;
+	cc.lpCustColors = (LPDWORD)acrCustClr;
+	cc.rgbResult = rgbCurrent;
+	cc.Flags = CC_FULLOPEN | CC_RGBINIT;
+
+	if (ChooseColor(&cc) == TRUE)
+	{
+		rgbCurrent = cc.rgbResult;
+		colorCurrent = cc.rgbResult;
+	}
 }
