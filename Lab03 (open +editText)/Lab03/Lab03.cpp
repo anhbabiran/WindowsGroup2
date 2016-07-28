@@ -396,12 +396,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 					// Grab the window dimensions.
 					RECT bounds;
+						
 					GetClientRect(hWnd, &bounds);
+
+					bounds.top = 100;
+					bounds.bottom = 800;
+					bounds.left = 100;
+					bounds.right = 800;
+						
 					// Grab a DC to draw with.
 					HDC hdc = GetDC(hWnd);
 
 					//Chọn font
 					DoSelectFont(hWnd);  
+
 					//Dùng biến font tạm lưu giá trị ghfont(nếu k bị trả về mặc đinh)
 					HFONT tmpFont = (HFONT)SelectObject(hdc, g_hfFont);
 					InvalidateRect(hWnd, NULL, TRUE);   
@@ -413,8 +421,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					//Tiến hành cho vẽ lên bitmap
 					HDC memDC = CreateCompatibleDC(hdc);
 
+					tmpFont = (HFONT)SelectObject(memDC, g_hfFont);
+
 					SelectObject(memDC, hBitmap);
-					BitBlt(hdc, 0, 0, 50, 50, memDC, 0, 0, SRCCOPY);
+					BitBlt(hdc, 0, 0, 0, 0, memDC, 0, 0, SRCCOPY);
 
 					DrawText(memDC, buff, -1, &bounds, DT_CENTER | DT_VCENTER);
 					DeleteDC(memDC);
