@@ -375,7 +375,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					// Display the Open dialog box. 
 					if (GetOpenFileName(&ofn)==TRUE) 
 					{
-						///////////////Thiênnnn
 						hBitmap = (HBITMAP)LoadImage( NULL, ofn.lpstrFile, IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 						HDC memDC = CreateCompatibleDC(hdc);
 
