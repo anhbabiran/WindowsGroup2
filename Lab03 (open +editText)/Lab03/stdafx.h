@@ -12,6 +12,7 @@
 #include <windows.h>
 
 #include <commdlg.h>
+#include <commctrl.h>
 #pragma comment (lib, "comdlg32.lib")
 #pragma comment (lib, "comctl32.lib")
 // C RunTime Header Files
